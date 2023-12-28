@@ -1,35 +1,62 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Vb.Data;
+using Vb.Data.Entity;
+
 
 namespace VbApi.Controllers;
-
-public class Staff
-{
-    [Required]
-    [StringLength(maximumLength: 250, MinimumLength = 10)]
-    public string? Name { get; set; }
-
-    [EmailAddress(ErrorMessage = "Email address is not valid.")]
-    public string? Email { get; set; }
-
-    [Phone(ErrorMessage = "Phone is not valid.")]
-    public string? Phone { get; set; }
-
-    [Range(minimum: 30, maximum: 400, ErrorMessage = "Hourly salary does not fall within allowed range.")]
-    public decimal? HourlySalary { get; set; }
-}
 
 [Route("api/[controller]")]
 [ApiController]
 public class StaffController : ControllerBase
 {
-    public StaffController()
+     private readonly VbDbContext dbContext;
+
+    public StaffController(VbDbContext dbContext)
     {
+        this.dbContext = dbContext;
+    }
+
+    [HttpGet]
+    public async Task<List<Staff>> Get()
+    {
+        return await dbContext.Set<Staff>()
+            .ToListAsync();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<Staff> Get(int id)
+    {
+        var staff =  await dbContext.Set<Staff>()
+            .Include(x=> x.Name)
+            .Include(x=> x.Email)
+            .Where(x => x.Id == id).FirstOrDefaultAsync();
+       
+        return staff;
     }
 
     [HttpPost]
-    public Staff Post([FromBody] Staff value)
+    public async Task Post([FromBody] Staff staff)
     {
-        return value;
+        await dbContext.Set<Staff>().AddAsync(staff);
+        await dbContext.SaveChangesAsync();
+    }
+
+    [HttpPut("{id}")]
+    public async Task Put(int id, [FromBody] Staff staff)
+    {
+        var fromdb = await dbContext.Set<Staff>().Where(x => x.Id == id).FirstOrDefaultAsync();
+        fromdb.Name = staff.Name;
+        fromdb.Email = staff.Email;
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task Delete(int id)
+    {
+        var fromdb = await dbContext.Set<Staff>().Where(x => x.Id == id).FirstOrDefaultAsync();
+        fromdb.IsActive = false;
+        await dbContext.SaveChangesAsync();
     }
 }
