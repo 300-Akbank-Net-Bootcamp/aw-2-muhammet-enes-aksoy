@@ -17,8 +17,7 @@ public class VbDbContext : DbContext
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<EftTransaction> EftTransactions { get; set; }
-    public DbSet<Staff> Staffs { get; set; }
-    public DbSet<Employee> Employees { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new AccountConfiguration());
@@ -27,8 +26,6 @@ public class VbDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ContactConfiguration());
         modelBuilder.ApplyConfiguration(new CustomerConfiguration());
         modelBuilder.ApplyConfiguration(new EftTransactionConfiguration());
-        modelBuilder.ApplyConfiguration(new StaffConfiguration());
-        modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         base.OnModelCreating(modelBuilder);
     }
     
